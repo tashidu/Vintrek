@@ -33,8 +33,6 @@ export interface Trail {
   distance: string // Primary/average distance
   duration: string // Primary/average duration
   description: string
-  price: number
-  available: boolean
   image?: string
   coordinates?: {
     lat: number
@@ -48,13 +46,14 @@ export interface Trail {
   startPoint?: TrailCoordinate
   endPoint?: TrailCoordinate
   features: string[]
-  maxCapacity: number
-  currentBookings: number
   // Trail ownership and contribution
   contributedBy?: string // wallet address of user who uploaded trail
   contributedByName?: string // display name of user who uploaded trail
   isPremiumOnly?: boolean
   isUserContributed?: boolean
+  // Free access like Wikiloc - no booking needed
+  createdAt?: number
+  verified?: boolean
 }
 
 // Booking Types

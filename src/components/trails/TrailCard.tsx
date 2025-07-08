@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { MapPin, Clock, TrendingUp, Calendar, Lock, Crown, Eye, User, Map, Navigation } from 'lucide-react'
-import { BookingModal } from './BookingModal'
+import { MapPin, Clock, TrendingUp, Lock, Crown, Eye, User, Map, Navigation } from 'lucide-react'
 import { Trail, TrailRoute } from '@/types'
 import { usePremiumStatus } from '@/components/premium/PremiumStatus'
 import { useWallet } from '@/components/providers/WalletProvider'
@@ -12,7 +11,6 @@ interface TrailCardProps {
 }
 
 export function TrailCard({ trail }: TrailCardProps) {
-  const [showBookingModal, setShowBookingModal] = useState(false)
   const { connected, trekBalance } = useWallet()
   const { isPremium, checkFeatureAccess } = usePremiumStatus()
 
@@ -30,8 +28,7 @@ export function TrailCard({ trail }: TrailCardProps) {
   }
 
   const handleViewTrail = () => {
-    if (!trail.available) return
-    // Navigate to trail detail page instead of booking modal
+    // Navigate to trail detail page - all trails are freely accessible
     window.location.href = `/trails/${trail.id}`
   }
 
@@ -51,15 +48,9 @@ export function TrailCard({ trail }: TrailCardProps) {
             </span>
           </div>
           <div className="absolute top-4 right-4">
-            {trail.available ? (
-              <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                Available
-              </span>
-            ) : (
-              <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                Booked
-              </span>
-            )}
+            <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+              Free Access
+            </span>
           </div>
           {/* Placeholder for trail image */}
           <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -154,14 +145,9 @@ export function TrailCard({ trail }: TrailCardProps) {
             <button
               type="button"
               onClick={handleViewTrail}
-              disabled={!trail.available}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                trail.available
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
+              className="flex-1 py-2 px-4 rounded-lg font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700"
             >
-              {trail.available ? 'View Trail' : 'Unavailable'}
+              View Trail & Map
             </button>
             {trail.isPremiumOnly && !isPremium ? (
               <button
@@ -175,40 +161,33 @@ export function TrailCard({ trail }: TrailCardProps) {
             ) : (
               <button
                 type="button"
-                title="View availability calendar"
+                title="View trail map"
                 className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                onClick={() => setShowBookingModal(true)}
+                onClick={handleViewTrail}
               >
-                <Calendar className="h-4 w-4" />
+                <Map className="h-4 w-4" />
               </button>
             )}
           </div>
         </div>
 
         {/* Access Information */}
-        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-          <div className="text-xs font-medium text-blue-800 mb-1">
-            {connected ? (isPremium ? 'Premium Access' : 'Free Access') : 'Connect Wallet for Full Features'}
+        <div className="mt-4 p-3 bg-green-50 rounded-lg">
+          <div className="text-xs font-medium text-green-800 mb-1">
+            Free Trail Access - Like Wikiloc
           </div>
-          <div className="flex items-center justify-between text-xs text-blue-600">
-            <span>✓ View trail info</span>
-            <span>✓ Static map</span>
-            <span>{isPremium ? '✓ GPS navigation' : '🔒 GPS (Premium)'}</span>
+          <div className="flex items-center justify-between text-xs text-green-600">
+            <span>✓ View trail info & map</span>
+            <span>✓ GPS tracking</span>
+            <span>{isPremium ? '✓ Premium features' : '✓ Basic features'}</span>
           </div>
           {!connected && (
-            <div className="text-xs text-blue-600 mt-1">
+            <div className="text-xs text-green-600 mt-1">
               Connect wallet to earn TREK tokens & NFTs
             </div>
           )}
         </div>
       </div>
-
-      {/* Booking Modal */}
-      <BookingModal
-        trail={trail}
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-      />
     </div>
   )
 }

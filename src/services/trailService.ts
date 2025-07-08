@@ -32,124 +32,10 @@ function convertBlockchainTrailToFrontend(blockchainTrail: TrailData): Trail {
   }
 }
 
-// Fallback mock data for when blockchain is not available
-const fallbackTrails: Trail[] = [
-  {
-    id: 'ella-rock-001',
-    name: 'Ella Rock Trail',
-    location: 'Ella, Sri Lanka',
-    difficulty: 'Moderate',
-    duration: '4-5 hours',
-    distance: '8 km',
-    price: 0,
-    rating: 4.8,
-    reviews: 156,
-    description: 'A scenic hike through tea plantations leading to breathtaking views of Ella Gap and the surrounding mountains.',
-    image: '/images/trails/ella-rock.jpg',
-    features: ['GPS Tracking', 'NFT Certificate', 'TREK Rewards'],
-    coordinates: [
-      { lat: 6.8667, lng: 81.0500 },
-      { lat: 6.8700, lng: 81.0520 },
-      { lat: 6.8750, lng: 81.0550 }
-    ],
-    rewards: {
-      trekTokens: 50,
-      nftCertificate: true,
-      experiencePoints: 500
-    },
-    isPremiumOnly: false,
-    createdBy: 'system',
-    verified: true,
-    createdAt: Date.now() - 86400000 // 1 day ago
-  },
-  {
-    id: 'adams-peak-002',
-    name: 'Adams Peak (Sri Pada)',
-    location: 'Ratnapura, Sri Lanka',
-    difficulty: 'Hard',
-    duration: '6-8 hours',
-    distance: '12 km',
-    price: 0,
-    rating: 4.9,
-    reviews: 234,
-    description: 'Sacred mountain pilgrimage with stunning sunrise views. Challenging night hike to reach the summit.',
-    image: '/images/trails/adams-peak.jpg',
-    features: ['GPS Tracking', 'NFT Certificate', 'TREK Rewards', 'Night Hiking'],
-    coordinates: [
-      { lat: 6.8094, lng: 80.4992 },
-      { lat: 6.8100, lng: 80.5000 },
-      { lat: 6.8110, lng: 80.5010 }
-    ],
-    rewards: {
-      trekTokens: 100,
-      nftCertificate: true,
-      experiencePoints: 1000
-    },
-    isPremiumOnly: false,
-    createdBy: 'system',
-    verified: true,
-    createdAt: Date.now() - 172800000 // 2 days ago
-  },
-  {
-    id: 'sigiriya-003',
-    name: 'Sigiriya Rock Fortress',
-    location: 'Dambulla, Sri Lanka',
-    difficulty: 'Moderate',
-    duration: '3-4 hours',
-    distance: '5 km',
-    price: 0,
-    rating: 4.7,
-    reviews: 189,
-    description: 'Ancient rock fortress with historical significance and panoramic views of the surrounding landscape.',
-    image: '/images/trails/sigiriya.jpg',
-    features: ['GPS Tracking', 'NFT Certificate', 'TREK Rewards', 'Historical Site'],
-    coordinates: [
-      { lat: 7.9568, lng: 80.7603 },
-      { lat: 7.9570, lng: 80.7605 },
-      { lat: 7.9575, lng: 80.7610 }
-    ],
-    rewards: {
-      trekTokens: 75,
-      nftCertificate: true,
-      experiencePoints: 750
-    },
-    isPremiumOnly: true, // Premium trail
-    createdBy: 'system',
-    verified: true,
-    createdAt: Date.now() - 259200000 // 3 days ago
-  },
-  {
-    id: 'hidden-waterfall-004',
-    name: 'Hidden Waterfall Trail',
-    location: 'Kandy, Sri Lanka',
-    difficulty: 'Moderate',
-    duration: '3-4 hours',
-    distance: '6.8 km',
-    price: 0,
-    rating: 4.6,
-    reviews: 42,
-    description: 'A beautiful hidden waterfall discovered by local hikers. This trail leads through dense forest to a stunning 40-meter waterfall with natural swimming pools.',
-    image: '/images/trails/hidden-waterfall.jpg',
-    features: ['GPS Tracking', 'NFT Certificate', 'TREK Rewards', 'Waterfall', 'Swimming'],
-    coordinates: [
-      { lat: 7.2906, lng: 80.6337 },
-      { lat: 7.2926, lng: 80.6357 },
-      { lat: 7.2956, lng: 80.6387 }
-    ],
-    rewards: {
-      trekTokens: 40,
-      nftCertificate: true,
-      experiencePoints: 400
-    },
-    isPremiumOnly: false,
-    isUserContributed: true,
-    contributedBy: 'addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3n0d3vllmyqwsx5wktcd8cc3sq835lu7drv2xwl2wywfgse35a3x',
-    contributedByName: 'Hiking_Explorer_LK',
-    createdBy: 'user',
-    verified: true,
-    createdAt: Date.now() - 86400000 // 1 day ago
-  }
-]
+// User-contributed trails storage (in production, this would be in a database)
+let userTrails: Trail[] = []
+
+// No sample trails - all trails come from user recordings and blockchain storage
 
 export class TrailService {
   private useBlockchain: boolean = false // Force fallback data for testing
@@ -174,66 +60,98 @@ export class TrailService {
     }
   }
 
-  // Get all trails (from blockchain or fallback)
+  // Get all trails (from blockchain, user contributions, and samples)
   async getTrails(): Promise<Trail[]> {
     try {
+      let allTrails: Trail[] = []
+
       if (this.useBlockchain) {
         console.log('🔗 Fetching trails from Cardano blockchain...')
         const blockchainTrails = await vinTrekBlockchainService.getTrailsFromChain()
-        
+
         if (blockchainTrails.length > 0) {
           console.log(`✅ Found ${blockchainTrails.length} trails on blockchain`)
-          return blockchainTrails.map(convertBlockchainTrailToFrontend)
-        } else {
-          console.log('📝 No trails found on blockchain, using fallback data')
-          console.log('Fallback trails count:', fallbackTrails.length)
-          console.log('User contributed trails:', fallbackTrails.filter(t => t.isUserContributed))
-          return fallbackTrails
+          allTrails = blockchainTrails.map(convertBlockchainTrailToFrontend)
         }
-      } else {
-        console.log('💾 Using fallback trail data (blockchain unavailable)')
-        console.log('Fallback trails count:', fallbackTrails.length)
-        console.log('User contributed trails:', fallbackTrails.filter(t => t.isUserContributed))
-        return fallbackTrails
       }
+
+      // Combine blockchain trails and user trails (no sample trails)
+      const combinedTrails = [...allTrails, ...userTrails]
+
+      console.log(`📊 Total trails available: ${combinedTrails.length}`)
+      console.log(`👥 User contributed trails: ${combinedTrails.filter(t => t.isUserContributed).length}`)
+
+      return combinedTrails
     } catch (error) {
       console.error('Error fetching trails:', error)
-      console.log('💾 Falling back to mock data due to error')
-      return fallbackTrails
+      console.log('💾 Falling back to sample data due to error')
+      return [...userTrails, ...sampleTrails]
     }
   }
 
   // Get trail by ID
   async getTrailById(trailId: string): Promise<Trail | null> {
-    try {
-      if (this.useBlockchain) {
-        const blockchainTrail = await vinTrekBlockchainService.getTrailById(trailId)
-        if (blockchainTrail) {
-          return convertBlockchainTrailToFrontend(blockchainTrail)
-        }
-      }
-      
-      // Fallback to mock data
-      return fallbackTrails.find(trail => trail.id === trailId) || null
-    } catch (error) {
-      console.error('Error fetching trail by ID:', error)
-      return fallbackTrails.find(trail => trail.id === trailId) || null
-    }
+    const trails = await this.getTrails()
+    return trails.find(trail => trail.id === trailId) || null
   }
 
-  // Store new trail on blockchain
-  async storeTrail(trailData: Omit<TrailData, 'txHash'>): Promise<string> {
-    if (!this.useBlockchain) {
-      throw new Error('Blockchain not available for storing trails')
-    }
+  // Get user contributed trails
+  async getUserTrails(): Promise<Trail[]> {
+    const allTrails = await this.getTrails()
+    return allTrails.filter(trail => trail.isUserContributed)
+  }
 
+  // Store new trail (blockchain or local storage)
+  async storeTrail(trailData: Omit<TrailData, 'txHash'>): Promise<string> {
     try {
-      console.log('🔗 Storing trail on Cardano blockchain...')
-      const txHash = await vinTrekBlockchainService.storeTrailOnChain(trailData)
-      console.log('✅ Trail stored successfully:', txHash)
-      return txHash
+      if (this.useBlockchain) {
+        console.log('🔗 Storing trail on Cardano blockchain...')
+        const txHash = await vinTrekBlockchainService.storeTrailOnChain(trailData)
+        console.log('✅ Trail stored successfully on blockchain:', txHash)
+        return txHash
+      } else {
+        // Store locally when blockchain is not available
+        console.log('💾 Storing trail locally (blockchain unavailable)')
+        const newTrail: Trail = {
+          id: trailData.id,
+          name: trailData.name,
+          location: trailData.location,
+          difficulty: trailData.difficulty,
+          distance: trailData.distance,
+          duration: trailData.duration,
+          description: trailData.description,
+          features: ['GPS Tracking', 'NFT Certificate', 'TREK Rewards'],
+          coordinates: trailData.coordinates.length > 0 ? trailData.coordinates[0] : undefined,
+          routes: [
+            {
+              id: `${trailData.id}-main`,
+              name: 'Main Route',
+              description: trailData.description,
+              difficulty: trailData.difficulty,
+              distance: trailData.distance,
+              duration: trailData.duration,
+              gpsRoute: trailData.coordinates,
+              startPoint: trailData.coordinates[0],
+              endPoint: trailData.coordinates[trailData.coordinates.length - 1],
+              verified: false,
+              createdAt: trailData.createdAt
+            }
+          ],
+          defaultRouteId: `${trailData.id}-main`,
+          isPremiumOnly: false,
+          isUserContributed: true,
+          contributedBy: trailData.createdBy,
+          contributedByName: 'Anonymous User',
+          verified: false,
+          createdAt: trailData.createdAt
+        }
+
+        userTrails.push(newTrail)
+        console.log('✅ Trail stored locally:', newTrail.id)
+        return `local-${Date.now()}`
+      }
     } catch (error) {
-      console.error('Error storing trail on blockchain:', error)
+      console.error('Error storing trail:', error)
       throw error
     }
   }

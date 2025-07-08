@@ -6,121 +6,14 @@ import {
   MapPin, Clock, TrendingUp, Users, Star, Calendar,
   Trophy, Coins, Camera, ArrowLeft, Share2, User
 } from 'lucide-react'
-import { BookingModal } from '@/components/trails/BookingModal'
+
 import { TrailCompletion } from '@/components/trails/TrailCompletion'
 import { TrailMap } from '@/components/maps/TrailMap'
 import { BlockchainVerification } from '@/components/blockchain/BlockchainVerification'
 import { PremiumStatus, usePremiumStatus } from '@/components/premium/PremiumStatus'
 import { Trail } from '@/types'
 
-// Mock trail data - in production, this would come from an API
-const mockTrails: Trail[] = [
-  {
-    id: '1',
-    name: 'Ella Rock Trail',
-    location: 'Ella, Sri Lanka',
-    difficulty: 'Moderate',
-    distance: '8.2 km',
-    duration: '4-5 hours',
-    description: 'A scenic hike offering panoramic views of the hill country with tea plantations and valleys. This trail takes you through lush green landscapes and offers some of the most breathtaking views in Sri Lanka.',
-    price: 2500,
-    available: true,
-    features: ['Scenic Views', 'Tea Plantations', 'Photography Spots', 'Wildlife Viewing'],
-    maxCapacity: 20,
-    currentBookings: 12,
-    coordinates: { lat: 6.8721, lng: 81.0462 },
-    startPoint: { lat: 6.8721, lng: 81.0462 },
-    endPoint: { lat: 6.8751, lng: 81.0492 },
-    gpsRoute: [
-      { lat: 6.8721, lng: 81.0462 },
-      { lat: 6.8731, lng: 81.0472 },
-      { lat: 6.8741, lng: 81.0482 },
-      { lat: 6.8751, lng: 81.0492 }
-    ],
-    isUserContributed: false,
-    isPremiumOnly: false
-  },
-  {
-    id: '2',
-    name: 'Adam\'s Peak (Sri Pada)',
-    location: 'Ratnapura, Sri Lanka',
-    difficulty: 'Hard',
-    distance: '11.5 km',
-    duration: '6-8 hours',
-    description: 'Sacred mountain pilgrimage with breathtaking sunrise views from the summit.',
-    price: 3500,
-    available: true,
-    features: ['Sunrise Views', 'Religious Site', 'Night Hiking'],
-    maxCapacity: 50,
-    currentBookings: 35,
-    coordinates: { lat: 6.8094, lng: 80.4992 },
-    startPoint: { lat: 6.8094, lng: 80.4992 },
-    endPoint: { lat: 6.8094, lng: 80.4992 },
-    gpsRoute: [
-      { lat: 6.8094, lng: 80.4992 },
-      { lat: 6.8104, lng: 80.5002 },
-      { lat: 6.8114, lng: 80.5012 },
-      { lat: 6.8124, lng: 80.5022 },
-      { lat: 6.8094, lng: 80.4992 }
-    ],
-    isUserContributed: false,
-    isPremiumOnly: false
-  },
-  {
-    id: '3',
-    name: 'Horton Plains National Park',
-    location: 'Nuwara Eliya, Sri Lanka',
-    difficulty: 'Easy',
-    distance: '9.5 km',
-    duration: '3-4 hours',
-    description: 'UNESCO World Heritage site featuring World\'s End cliff and Baker\'s Falls.',
-    price: 4000,
-    available: false,
-    features: ['World\'s End', 'Baker\'s Falls', 'Wildlife Viewing'],
-    maxCapacity: 30,
-    currentBookings: 30,
-    coordinates: { lat: 6.8069, lng: 80.7906 },
-    startPoint: { lat: 6.8069, lng: 80.7906 },
-    endPoint: { lat: 6.8099, lng: 80.7936 },
-    gpsRoute: [
-      { lat: 6.8069, lng: 80.7906 },
-      { lat: 6.8079, lng: 80.7916 },
-      { lat: 6.8089, lng: 80.7926 },
-      { lat: 6.8099, lng: 80.7936 }
-    ],
-    isUserContributed: false,
-    isPremiumOnly: true
-  },
-  {
-    id: '4',
-    name: 'Hidden Waterfall Trail',
-    location: 'Kandy, Sri Lanka',
-    difficulty: 'Moderate',
-    distance: '6.8 km',
-    duration: '3-4 hours',
-    description: 'A beautiful hidden waterfall discovered by local hikers. This trail leads through dense forest to a stunning 40-meter waterfall with natural swimming pools.',
-    price: 0,
-    available: true,
-    features: ['Waterfall', 'Swimming', 'Forest Trail', 'Photography'],
-    maxCapacity: 15,
-    currentBookings: 8,
-    coordinates: { lat: 7.2906, lng: 80.6337 },
-    startPoint: { lat: 7.2906, lng: 80.6337 },
-    endPoint: { lat: 7.2956, lng: 80.6387 },
-    gpsRoute: [
-      { lat: 7.2906, lng: 80.6337 },
-      { lat: 7.2916, lng: 80.6347 },
-      { lat: 7.2926, lng: 80.6357 },
-      { lat: 7.2936, lng: 80.6367 },
-      { lat: 7.2946, lng: 80.6377 },
-      { lat: 7.2956, lng: 80.6387 }
-    ],
-    isUserContributed: true,
-    contributedBy: 'addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3n0d3vllmyqwsx5wktcd8cc3sq835lu7drv2xwl2wywfgse35a3x',
-    contributedByName: 'Hiking_Explorer_LK',
-    isPremiumOnly: false
-  }
-]
+import { trailService } from '@/services/trailService'
 
 export default function TrailDetailPage() {
   const params = useParams()
@@ -128,21 +21,30 @@ export default function TrailDetailPage() {
   const { isPremium, checkFeatureAccess } = usePremiumStatus()
 
   const [trail, setTrail] = useState<Trail | null>(null)
-  const [showBookingModal, setShowBookingModal] = useState(false)
   const [showCompletionModal, setShowCompletionModal] = useState(false)
   const [selectedRouteId, setSelectedRouteId] = useState<string>('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Simulate API call
-    const foundTrail = mockTrails.find(t => t.id === trailId)
-    setTrail(foundTrail || null)
-    setLoading(false)
+    const loadTrail = async () => {
+      try {
+        const trails = await trailService.getTrails()
+        const foundTrail = trails.find(t => t.id === trailId)
+        setTrail(foundTrail || null)
 
-    // Set default route if trail has routes
-    if (foundTrail?.routes && foundTrail.routes.length > 0) {
-      setSelectedRouteId(foundTrail.defaultRouteId || foundTrail.routes[0].id)
+        // Set default route if trail has routes
+        if (foundTrail?.routes && foundTrail.routes.length > 0) {
+          setSelectedRouteId(foundTrail.defaultRouteId || foundTrail.routes[0].id)
+        }
+      } catch (error) {
+        console.error('Error loading trail:', error)
+        setTrail(null)
+      } finally {
+        setLoading(false)
+      }
     }
+
+    loadTrail()
   }, [trailId])
 
   if (loading) {
@@ -437,39 +339,24 @@ export default function TrailDetailPage() {
                     {trail.available ? 'Available' : 'Fully Booked'}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Capacity:</span>
-                  <span className="text-gray-900">{trail.currentBookings}/{trail.maxCapacity}</span>
-                </div>
               </div>
 
               <div className="space-y-3">
                 <button
-                  onClick={() => setShowBookingModal(true)}
-                  disabled={!trail.available}
-                  className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
-                    trail.available
-                      ? 'bg-green-600 text-white hover:bg-green-700'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
-                >
-                  {trail.available ? 'Book This Trail' : 'Fully Booked'}
-                </button>
-                
-                <button
+                  type="button"
                   onClick={() => setShowCompletionModal(true)}
-                  className="w-full py-3 px-4 border border-green-600 text-green-600 rounded-lg hover:bg-green-50 transition-colors"
+                  className="w-full py-3 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
                 >
-                  Mark as Completed
+                  Start Trail & Track Progress
                 </button>
               </div>
 
-              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                <div className="text-xs font-medium text-blue-800 mb-1">Blockchain Features</div>
-                <div className="flex items-center justify-between text-xs text-blue-600">
-                  <span>✓ On-chain booking</span>
+              <div className="mt-4 p-3 bg-green-50 rounded-lg">
+                <div className="text-xs font-medium text-green-800 mb-1">Free Access Features</div>
+                <div className="flex items-center justify-between text-xs text-green-600">
+                  <span>✓ GPS tracking</span>
                   <span>✓ NFT certificate</span>
-                  <span>✓ Token rewards</span>
+                  <span>✓ TREK rewards</span>
                 </div>
               </div>
             </div>
@@ -507,11 +394,7 @@ export default function TrailDetailPage() {
       </div>
 
       {/* Modals */}
-      <BookingModal
-        trail={trail}
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-      />
+
 
       <TrailCompletion
         trail={trail}

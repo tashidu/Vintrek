@@ -1,50 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Mountain, Wallet, MapPin, Trophy, Coins, Users } from 'lucide-react'
 import { WalletConnect } from '@/components/wallet/WalletConnect'
 import { TrailCard } from '@/components/trails/TrailCard'
 import { StatsCard } from '@/components/ui/StatsCard'
+import { trailService } from '@/services/trailService'
+import { Trail } from '@/types'
 
-// Mock data for demonstration
-const featuredTrails = [
-  {
-    id: '1',
-    name: 'Ella Rock Trail',
-    location: 'Ella, Sri Lanka',
-    difficulty: 'Moderate',
-    distance: '8.2 km',
-    duration: '4-5 hours',
-    image: '/api/placeholder/400/300',
-    description: 'A scenic hike offering panoramic views of the hill country.',
-    price: 2500,
-    available: true,
-  },
-  {
-    id: '2',
-    name: 'Adam\'s Peak',
-    location: 'Ratnapura, Sri Lanka',
-    difficulty: 'Hard',
-    distance: '11.5 km',
-    duration: '6-8 hours',
-    image: '/api/placeholder/400/300',
-    description: 'Sacred mountain with breathtaking sunrise views.',
-    price: 3500,
-    available: true,
-  },
-  {
-    id: '3',
-    name: 'Horton Plains',
-    location: 'Nuwara Eliya, Sri Lanka',
-    difficulty: 'Easy',
-    distance: '9.5 km',
-    duration: '3-4 hours',
-    image: '/api/placeholder/400/300',
-    description: 'UNESCO World Heritage site with World\'s End viewpoint.',
-    price: 4000,
-    available: false,
-  },
-]
+// Featured trails will be loaded from user-recorded trails and blockchain
 
 const stats = [
   { icon: Mountain, label: 'Trails Available', value: '150+' },
@@ -55,6 +19,25 @@ const stats = [
 
 export default function HomePage() {
   const [isConnected, setIsConnected] = useState(false)
+  const [featuredTrails, setFeaturedTrails] = useState<Trail[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const loadFeaturedTrails = async () => {
+      try {
+        const trails = await trailService.getTrails()
+        // Show only the first 3 trails as featured
+        setFeaturedTrails(trails.slice(0, 3))
+      } catch (error) {
+        console.error('Failed to load featured trails:', error)
+        setFeaturedTrails([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadFeaturedTrails()
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
@@ -132,14 +115,36 @@ export default function HomePage() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Featured Trails</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Discover our most popular hiking destinations and start your blockchain-powered adventure today.
+              Discover user-recorded hiking trails and start your blockchain-powered adventure today.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredTrails.map((trail) => (
-              <TrailCard key={trail.id} trail={trail} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading trails...</p>
+            </div>
+          ) : featuredTrails.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredTrails.map((trail) => (
+                <TrailCard key={trail.id} trail={trail} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Mountain className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Trails Yet</h3>
+              <p className="text-gray-600 mb-6">
+                Be the first to record a trail! Use the GPS tracking feature to create new hiking routes.
+              </p>
+              <button
+                type="button"
+                onClick={() => window.location.href = '/record'}
+                className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+              >
+                Record Your First Trail
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

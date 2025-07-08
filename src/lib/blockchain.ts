@@ -88,24 +88,36 @@ export class BlockchainService {
     if (!sdkReady) throw new Error('Blockchain SDK not loaded')
 
     try {
-      const balance = await this.wallet.getBalance()
-      return balance
+      // Check if wallet has getBalance method
+      if (typeof this.wallet.getBalance === 'function') {
+        const balance = await this.wallet.getBalance()
+        return balance
+      } else {
+        console.warn('Wallet does not support getBalance method')
+        return '0'
+      }
     } catch (error) {
       console.error('Error fetching wallet balance:', error)
-      throw error
+      return '0' // Return 0 instead of throwing
     }
   }
 
   // Get wallet assets (NFTs and tokens)
   async getWalletAssets(): Promise<any[]> {
     if (!this.wallet) throw new Error('Wallet not connected')
-    
+
     try {
-      const assets = await this.wallet.getAssets()
-      return assets
+      // Check if wallet has getAssets method, otherwise return empty array
+      if (typeof this.wallet.getAssets === 'function') {
+        const assets = await this.wallet.getAssets()
+        return assets
+      } else {
+        console.warn('Wallet does not support getAssets method')
+        return []
+      }
     } catch (error) {
       console.error('Error fetching wallet assets:', error)
-      throw error
+      return [] // Return empty array instead of throwing
     }
   }
 
