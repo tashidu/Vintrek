@@ -13,6 +13,14 @@ VinTrek is a revolutionary blockchain-powered web platform that gamifies eco-tou
 - **Token Rewards**: Earn TREK tokens for completing trails and activities
 - **Wallet Integration**: Connect with Cardano wallets (Lace, Eternl, Nami, Flint)
 
+### 🤖 AI-Powered Safety Features
+- **Weather Risk Assessment**: Real-time weather analysis with safety recommendations
+- **Crowd Density Prediction**: ML-based crowd forecasting for optimal hiking times
+- **Personalized Difficulty**: AI adjusts trail difficulty based on your fitness profile
+- **Emergency Detection**: Accelerometer + GPS monitoring for fall/emergency detection
+- **Smart Recommendations**: AI suggests trails based on weather, crowd, and personal factors
+- **Emergency Contact Alerts**: Automated safety check-ins and emergency notifications
+
 ### Blockchain Features
 - **On-chain Trail Logs**: Transparent trail recording and verification
 - **Trail NFTs**: Unique collectible certificates with metadata
@@ -27,6 +35,8 @@ VinTrek is a revolutionary blockchain-powered web platform that gamifies eco-tou
 - **Wallets**: Lace, Eternl, Nami, Flint
 - **Maps**: Leaflet, React Leaflet
 - **Storage**: IPFS/Arweave for NFT metadata
+- **AI/ML**: OpenWeatherMap API, Custom ML models for crowd prediction
+- **Safety**: Device motion API, GPS tracking, Emergency contact system
 
 ## 🚀 Getting Started
 
@@ -56,6 +66,7 @@ VinTrek is a revolutionary blockchain-powered web platform that gamifies eco-tou
    Edit `.env.local` with your configuration:
    - Blockfrost project ID
    - Smart contract addresses
+   - OpenWeatherMap API key (for AI safety features)
    - API keys
 
 4. **Run the development server**
@@ -139,10 +150,14 @@ vintrek/
 - ✅ Wallet integration
 - ✅ NFT minting functionality
 - ✅ Token reward system
+- ✅ AI-powered safety features
+- ✅ Weather risk assessment
+- ✅ Emergency detection system
+- ✅ Personalized trail recommendations
 
 ### Phase 2 (Next)
-- [ ] AI trail recommendations
-- [ ] AR/VR content unlocks
+- [ ] Advanced AI features (AR plant identification, wildlife spotting)
+- [ ] IoT integration (smart trail markers, weather stations)
 - [ ] Social features and leaderboards
 - [ ] Mobile app (Flutter)
 

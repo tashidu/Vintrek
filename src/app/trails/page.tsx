@@ -1,11 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { MapPin, Filter, Search, Mountain } from 'lucide-react'
+import { MapPin, Filter, Search, Mountain, Brain } from 'lucide-react'
 import { TrailCard } from '@/components/trails/TrailCard'
+import { AITrailRecommendations } from '@/components/ai/AITrailRecommendations'
 import { LoadingSpinner, BlockchainLoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { BlockchainVerification } from '@/components/blockchain/BlockchainVerification'
 import { PremiumStatus } from '@/components/premium/PremiumStatus'
+import { useWallet } from '@/components/providers/WalletProvider'
+import { useUserFitnessProfile } from '@/hooks/useUserFitnessProfile'
 import { Trail } from '@/types'
 import { trailService } from '@/services/trailService'
 
@@ -23,6 +26,12 @@ export default function TrailsPage() {
   const [sortBy, setSortBy] = useState<string>('name')
   const [isLoading, setIsLoading] = useState(true)
   const [blockchainLoading, setBlockchainLoading] = useState(false)
+  const [showAIRecommendations, setShowAIRecommendations] = useState(true)
+  const [selectedTrail, setSelectedTrail] = useState<Trail | null>(null)
+
+  // Wallet and user profile for AI features
+  const { connected, walletAddress } = useWallet()
+  const { profile: userProfile, loading: profileLoading } = useUserFitnessProfile(walletAddress)
 
   // Get unique locations and difficulties for filters
   const locations = Array.from(new Set(trails.map(trail => trail.location.split(',')[1]?.trim() || trail.location)))
@@ -148,6 +157,38 @@ export default function TrailsPage() {
           </a>
         </div>
 
+        {/* AI Recommendations */}
+        {connected && userProfile && !profileLoading && showAIRecommendations && trails.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-2">
+                <Brain className="h-6 w-6 text-purple-600" />
+                <h2 className="text-xl font-semibold text-gray-900">AI Recommendations for You</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAIRecommendations(false)}
+                className="text-gray-400 hover:text-gray-600 text-sm"
+              >
+                Hide
+              </button>
+            </div>
+            <AITrailRecommendations
+              trails={trails}
+              userProfile={userProfile}
+              onTrailSelect={(trail) => {
+                setSelectedTrail(trail)
+                // Scroll to trail in the list or show details
+                const element = document.getElementById(`trail-${trail.id}`)
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth' })
+                }
+              }}
+              maxRecommendations={3}
+            />
+          </div>
+        )}
+
         {/* Blockchain & Premium Status */}
         <div className="grid lg:grid-cols-2 gap-8 mb-8">
           <BlockchainVerification />
@@ -258,7 +299,17 @@ export default function TrailsPage() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredTrails.map((trail) => (
-              <TrailCard key={trail.id} trail={trail} />
+              <div
+                key={trail.id}
+                id={`trail-${trail.id}`}
+                className={`transition-all duration-300 ${
+                  selectedTrail?.id === trail.id
+                    ? 'ring-2 ring-purple-500 ring-offset-2 scale-105'
+                    : ''
+                }`}
+              >
+                <TrailCard trail={trail} />
+              </div>
             ))}
           </div>
         )}

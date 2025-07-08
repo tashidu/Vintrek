@@ -140,11 +140,135 @@ export interface TrailAPIResponse<T> {
   message?: string
 }
 
+// AI Safety & Recommendations Types
+export interface TrailSafetyAI {
+  weatherRiskAssessment: boolean
+  crowdDensityPrediction: number
+  personalizedDifficulty: number
+  emergencyContactAlert: boolean
+}
+
+export interface WeatherRiskAssessment {
+  riskLevel: 'low' | 'moderate' | 'high' | 'extreme'
+  riskScore: number // 0-100
+  conditions: WeatherCondition[]
+  recommendations: string[]
+  safeTimeWindow?: {
+    start: string
+    end: string
+  }
+}
+
+export interface WeatherCondition {
+  type: 'rain' | 'storm' | 'wind' | 'temperature' | 'visibility' | 'uv'
+  severity: 'low' | 'moderate' | 'high' | 'extreme'
+  value: number
+  unit: string
+  description: string
+}
+
+export interface CrowdDensityPrediction {
+  currentDensity: number // 0-100 (percentage of capacity)
+  predictedDensity: number // predicted for next 2 hours
+  optimalTimes: Array<{
+    time: string
+    density: number
+    recommendation: string
+  }>
+  peakHours: string[]
+  quietHours: string[]
+}
+
+export interface PersonalizedDifficulty {
+  originalDifficulty: TrailDifficulty
+  personalizedDifficulty: TrailDifficulty
+  adjustmentFactors: Array<{
+    factor: string
+    impact: number // -2 to +2 difficulty adjustment
+    description: string
+  }>
+  fitnessScore: number // 0-100
+  experienceLevel: 'beginner' | 'intermediate' | 'advanced' | 'expert'
+  recommendations: string[]
+}
+
+export interface EmergencyContactAlert {
+  enabled: boolean
+  contacts: EmergencyContact[]
+  autoTriggerConditions: {
+    noMovementMinutes: number
+    lowBatteryPercent: number
+    offTrailDistanceMeters: number
+    heartRateThreshold?: number
+  }
+  lastCheckIn?: string
+  nextScheduledCheckIn?: string
+}
+
+export interface EmergencyContact {
+  id: string
+  name: string
+  phone: string
+  email?: string
+  relationship: string
+  priority: number
+}
+
+export interface AITrailRecommendation {
+  trailId: string
+  recommendationScore: number // 0-100
+  reasons: string[]
+  safetyFactors: {
+    weather: number
+    crowd: number
+    difficulty: number
+    emergency: number
+  }
+  optimalStartTime: string
+  estimatedCompletionTime: string
+  requiredEquipment: string[]
+  warnings: string[]
+}
+
+export interface UserFitnessProfile {
+  id: string
+  walletAddress: string
+  fitnessLevel: number // 0-100
+  experienceLevel: 'beginner' | 'intermediate' | 'advanced' | 'expert'
+  completedTrails: number
+  totalDistance: number
+  averagePace: number // minutes per km
+  preferredDifficulty: TrailDifficulty[]
+  medicalConditions?: string[]
+  emergencyContacts: EmergencyContact[]
+  lastUpdated: string
+}
+
+export interface AccelerometerData {
+  x: number
+  y: number
+  z: number
+  timestamp: string
+  magnitude: number
+}
+
+export interface EmergencyDetection {
+  isMonitoring: boolean
+  fallDetected: boolean
+  noMovementDetected: boolean
+  offTrailDetected: boolean
+  lastMovement: string
+  alertsSent: number
+  emergencyTriggered: boolean
+}
+
 // Utility Types
 export type TrailStatus = 'not_started' | 'in_progress' | 'paused' | 'completed' | 'cancelled'
 export type TrailDifficulty = 'Easy' | 'Moderate' | 'Hard' | 'Expert'
 export type DistanceUnit = 'meters' | 'kilometers' | 'miles'
 export type SpeedUnit = 'mps' | 'kmh' | 'mph'
+export type WeatherRiskLevel = 'low' | 'moderate' | 'high' | 'extreme'
+export type SafetyAlertType = 'weather' | 'crowd' | 'emergency' | 'equipment' | 'time'
 
 // Helper function types
 export interface TrailCalculations {

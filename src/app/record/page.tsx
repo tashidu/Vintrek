@@ -1,19 +1,41 @@
 'use client'
 
-import { useState } from 'react'
-import { Mountain, ArrowLeft, Trophy, Coins } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Mountain, ArrowLeft, Trophy, Coins, Brain, Shield } from 'lucide-react'
 import Link from 'next/link'
 import { TrailRecorder } from '@/components/trail/TrailRecorder'
 import { LocationStatus } from '@/components/trail/LocationStatus'
+import { EmergencyDetection } from '@/components/ai/EmergencyDetection'
 import { useWallet } from '@/components/providers/WalletProvider'
+import { useUserFitnessProfile } from '@/hooks/useUserFitnessProfile'
+import { useGPSTracking } from '@/hooks/useGPSTracking'
 import { CompletedTrail } from '@/types/trail'
 
 export default function RecordPage() {
-  const { connected } = useWallet()
+  const { connected, walletAddress } = useWallet()
   const [completedTrail, setCompletedTrail] = useState<CompletedTrail | null>(null)
+  const [isRecording, setIsRecording] = useState(false)
+
+  // User fitness profile for AI safety features
+  const { profile: userProfile, loading: profileLoading } = useUserFitnessProfile(walletAddress)
+
+  // GPS tracking for emergency detection
+  const { currentPosition } = useGPSTracking({
+    enableHighAccuracy: true,
+    trackingInterval: 5000
+  })
 
   const handleTrailCompleted = (trail: CompletedTrail) => {
     setCompletedTrail(trail)
+    setIsRecording(false)
+  }
+
+  const handleRecordingStart = () => {
+    setIsRecording(true)
+  }
+
+  const handleRecordingStop = () => {
+    setIsRecording(false)
   }
 
   if (!connected) {
@@ -159,8 +181,60 @@ export default function RecordPage() {
           {/* Location Status */}
           <LocationStatus />
 
+          {/* AI Safety Features */}
+          {userProfile && !profileLoading && (
+            <div className="space-y-4">
+              {/* Emergency Detection */}
+              <EmergencyDetection
+                userProfile={userProfile}
+                isHiking={isRecording}
+                currentLocation={currentPosition}
+                onEmergencyTriggered={(emergency) => {
+                  console.log('🚨 Emergency triggered:', emergency)
+                  // In production, this would handle emergency protocols
+                }}
+              />
+
+              {/* AI Safety Status */}
+              <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Brain className="h-5 w-5 text-purple-600" />
+                  <span className="font-semibold text-gray-900">AI Safety Assistant</span>
+                </div>
+                <div className="text-sm text-gray-700 space-y-1">
+                  <div className="flex items-center space-x-2">
+                    <Shield className="h-4 w-4 text-green-600" />
+                    <span>Emergency monitoring: {userProfile.emergencyContacts.length > 0 ? 'Active' : 'Setup required'}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Brain className="h-4 w-4 text-blue-600" />
+                    <span>Fitness level: {userProfile.fitnessLevel}/100 ({userProfile.experienceLevel})</span>
+                  </div>
+                </div>
+                {userProfile.emergencyContacts.length === 0 && (
+                  <div className="mt-2">
+                    <button
+                      type="button"
+                      className="text-purple-600 hover:text-purple-800 text-sm"
+                      onClick={() => {
+                        // In production, this would open emergency contact setup
+                        alert('Emergency contact setup would open here')
+                      }}
+                    >
+                      Set up emergency contacts →
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Trail Recorder */}
-          <TrailRecorder onTrailCompleted={handleTrailCompleted} />
+          <TrailRecorder
+            onTrailCompleted={handleTrailCompleted}
+            onRecordingStart={handleRecordingStart}
+            onRecordingStop={handleRecordingStop}
+          />
 
           {/* Info Cards */}
           <div className="grid md:grid-cols-2 gap-4">
